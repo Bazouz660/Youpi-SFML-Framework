@@ -10,7 +10,7 @@
 #ifndef EXNG_TRANSFORM_HPP_
 #define EXNG_TRANSFORM_HPP_
 
-#include "sfml.hpp"
+#include "ypi/lib_headers/sfml.hpp"
 #include "Vector2.hpp"
 #include "core/rect/Rect.hpp"
 

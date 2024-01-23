@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "common.hpp"
+#include "ypi/lib_headers/common.hpp"
 #include <math.h>
 #include "core/rect/Rect.hpp"
 #include "core/vector2/Vector2.hpp"

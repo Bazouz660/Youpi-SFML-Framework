@@ -1,4 +1,4 @@
-#include "common.hpp"
+#include "ypi/lib_headers/common.hpp"
 #include <bitset>
 #include "component.hpp"
 

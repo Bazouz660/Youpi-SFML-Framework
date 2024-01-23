@@ -10,7 +10,7 @@
 #ifndef EXNG_KEYBOARD_HPP
 #define EXNG_KEYBOARD_HPP
 
-#include "sfml.hpp"
+#include "ypi/lib_headers/sfml.hpp"
 
 namespace exng
 {

@@ -10,7 +10,7 @@
 #ifndef EXNG_WINDOW_HPP_
 #define EXNG_WINDOW_HPP_
 
-#include "common.hpp"
+#include "ypi/lib_headers/common.hpp"
 #include "core/vector2/Vector2.hpp"
 
 namespace exng {

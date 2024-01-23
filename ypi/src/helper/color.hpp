@@ -8,7 +8,7 @@
 #ifndef COLOR_HPP_
     #define COLOR_HPP_
 
-    #include "common.hpp"
+    #include "ypi/lib_headers/common.hpp"
     #include <cmath>
 
     namespace exng {

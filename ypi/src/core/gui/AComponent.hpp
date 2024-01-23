@@ -1,4 +1,4 @@
-#include "sfml.hpp"
+#include "ypi/lib_headers/sfml.hpp"
 #include "../window/Window.hpp"
 
 #ifndef EXNG_GUI_ACOMPONENT_HPP

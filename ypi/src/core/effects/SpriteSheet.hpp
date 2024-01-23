@@ -1,8 +1,8 @@
 #ifndef EXNG_EFFECTS_SPRITESHEET_HPP
 #define EXNG_EFFECTS_SPRITESHEET_HPP
 
-#include "ypi/include/common.hpp"
-#include "ypi/include/sfml.hpp"
+#include "ypi/lib_headers/common.hpp"
+#include "ypi/lib_headers/sfml.hpp"
 #include "ypi/src/core/rect/Rect.hpp"
 #include "ypi/src/core/vector2/Vector2.hpp"
 

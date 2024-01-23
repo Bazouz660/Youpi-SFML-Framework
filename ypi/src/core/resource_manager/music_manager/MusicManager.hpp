@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "common.hpp"
+#include "ypi/lib_headers/common.hpp"
 
 #include "logger.hpp"
 #include "parsing.hpp"

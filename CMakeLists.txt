@@ -5,7 +5,9 @@ include(FetchContent)
 include(ExternalProject)
 
 if(UNIX)
-    set(CMAKE_CXX_FLAGS "-ldl")
+    set(CMAKE_CXX_FLAGS "-ldl -O3")
+else()
+    set(CMAKE_CXX_FLAGS "-O3")
 endif()
 
 # Clone and bootstrap vcpkg if it doesn't exist
@@ -61,3 +63,4 @@ find_package(SFML COMPONENTS graphics window system network audio REQUIRED)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(ypi)
+add_subdirectory(exemples/verlet)

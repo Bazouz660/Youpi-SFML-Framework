@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.hpp"
+#include "ypi/lib_headers/common.hpp"
 
 namespace exng {
 

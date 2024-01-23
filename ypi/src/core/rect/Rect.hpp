@@ -11,7 +11,7 @@
 #define EXNG_RECT_HPP_
 
 #include "Vector2.hpp"
-#include "sfml.hpp"
+#include "ypi/lib_headers/sfml.hpp"
 
 namespace exng {
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "common.hpp"
+#include "ypi/lib_headers/common.hpp"
 #include "parsing.hpp"
 #include "Exception.hpp"
-#include "json.hpp"
+#include "ypi/lib_headers/sfml.hpp"
 #include <locale>
 #include <codecvt>
 

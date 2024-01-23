@@ -8,8 +8,8 @@
 #ifndef EXNG_EFFECTS_FADE_HPP
 #define EXNG_EFFECTS_FADE_HPP
 
-#include "ypi/include/common.hpp"
-#include "ypi/include/sfml.hpp"
+#include "ypi/lib_headers/common.hpp"
+#include "ypi/lib_headers/sfml.hpp"
 
 namespace exng::effect {
 

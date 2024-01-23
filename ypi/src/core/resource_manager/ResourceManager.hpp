@@ -17,7 +17,7 @@
 #include <functional>
 #include <atomic>
 
-#include "common.hpp"
+#include "ypi/lib_headers/common.hpp"
 #include "parsing.hpp"
 #include "logger.hpp"
 #include "MusicManager.hpp"
