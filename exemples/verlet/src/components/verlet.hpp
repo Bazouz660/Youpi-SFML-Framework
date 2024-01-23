@@ -7,6 +7,7 @@ namespace comp {
     struct Verlet
     {
         float radius = 5.0f;
+        float mass = 1.0f;
         exng::Vector2f position;
         exng::Vector2f oldPosition;
         exng::Vector2f acceleration;

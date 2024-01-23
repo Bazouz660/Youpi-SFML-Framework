@@ -9,9 +9,9 @@
 
 namespace exng::gui
 {
-    Label::Label(const sf::Vector2f &position, const std::string &text, int size)
+    Label::Label(const exng::Vector2f &position, const std::string &text, int size)
     {
-        m_text.setPosition(position);
+        m_text.setPosition(position.x, position.y);
         m_text.setString(text);
         m_text.setCharacterSize(size);
     }

@@ -62,12 +62,13 @@ public:
 
 	T& getData(Entity entity)
 	{
-		if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end()) {
- 			throw std::runtime_error("Retrieving non-existent component for entity " + std::to_string(entity));
+		auto it = mEntityToIndexMap.find(entity);
+		if (it == mEntityToIndexMap.end()) {
+			throw std::runtime_error("Retrieving non-existent component for entity " + std::to_string(entity));
 		}
 
 		// Return a reference to the entity's component
-		return mComponentArray[mEntityToIndexMap[entity]];
+		return mComponentArray[it->second];
 	}
 
 	void entityDestroyed(Entity entity) override

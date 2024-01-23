@@ -95,9 +95,10 @@ private:
 	{
 		const char* typeName = typeid(T).name();
 
-		assert(mComponentTypes.find(typeName) != mComponentTypes.end() && "Component not registered before use.");
+		auto it = mComponentTypes.find(typeName);
+		assert(it != mComponentTypes.end() && "Component not registered before use.");
 
-		return std::static_pointer_cast<ComponentArray<T>>(mComponentArrays[typeName]);
+		return std::static_pointer_cast<ComponentArray<T>>(mComponentArrays[it->first]);
 	}
 };
 

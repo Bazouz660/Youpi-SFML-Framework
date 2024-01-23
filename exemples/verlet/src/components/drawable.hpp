@@ -14,6 +14,11 @@ namespace comp {
         sf::PrimitiveType primitiveType = sf::PrimitiveType::Triangles;
     };
 
+    struct CircleDrawable
+    {
+        sf::CircleShape shape;
+    };
+
 }
 
 #endif // !DRAWABLE_HPP_

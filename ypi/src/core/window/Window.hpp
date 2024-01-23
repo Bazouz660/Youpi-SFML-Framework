@@ -41,6 +41,8 @@ namespace exng {
         void setFramerateLimit(unsigned int limit);
         void setVerticalSyncEnabled(bool enabled);
 
+        exng::Vector2f getMousePosition() const;
+
         void setView(const View& view);
         View getView() const;
 

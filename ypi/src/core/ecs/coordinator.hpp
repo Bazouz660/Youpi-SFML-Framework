@@ -12,10 +12,8 @@
 #include "entityManager.hpp"
 #include "systemManager.hpp"
 
-#include "helper/SafeDequeue.hpp"
 #include "core/event/Observer.hpp"
 
-#include <mutex>
 
 namespace exng {
 
@@ -26,8 +24,6 @@ public:
 
 	void init()
 	{
-		// Create pointers to each manager
-		std::lock_guard<std::mutex> lock(m_mutex);
 		mComponentManager = std::make_unique<ComponentManager>();
 		mEntityManager = std::make_unique<EntityManager>();
 		mSystemManager = std::make_unique<SystemManager>();
@@ -35,13 +31,11 @@ public:
 
 	bool entityExists(Entity entity)
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
 		return mEntityManager->entityExists(entity);
 	}
 
 	Entity createEntity()
 	{
-        std::lock_guard<std::mutex> lock(m_mutex);
 		auto entity = mEntityManager->createEntity();
 		m_entities.push_back(entity);
 		return entity;
@@ -49,7 +43,6 @@ public:
 
 	void destroyEntity(Entity entity)
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
 		mEntityManager->destroyEntity(entity);
 
 		mComponentManager->entityDestroyed(entity);
@@ -63,21 +56,18 @@ public:
 	template<typename T>
 	void registerComponent()
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
 		mComponentManager->registerComponent<T>();
 	}
 
 	template<typename T>
 	bool isComponentRegistered()
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
 		return mComponentManager->isComponentRegistered(typeid(T).name());
 	}
 
 	template<typename T>
 	T& addComponent(Entity entity, T component)
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
 		mComponentManager->addComponent<T>(entity, component);
 
 		auto signature = mEntityManager->getSignature(entity);
@@ -91,7 +81,6 @@ public:
 	template<typename T>
 	void removeComponent(Entity entity)
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
 		mComponentManager->removeComponent<T>(entity);
 
 		auto signature = mEntityManager->getSignature(entity);
@@ -104,28 +93,24 @@ public:
 	template<typename T>
 	T& getComponent(Entity entity)
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
 		return mComponentManager->getComponent<T>(entity);
 	}
 
 	template<typename T>
 	ComponentType getComponentType()
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
 		return mComponentManager->getComponentType<T>();
 	}
 
 	template<typename T>
 	bool hasComponent(Entity entity)
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
 		return mComponentManager->hasComponent<T>(entity, typeid(T).name());
 	}
 
     template <typename SystemType, typename... ComponentTypes>
     std::shared_ptr<SystemType> createSystem()
     {
-		std::lock_guard<std::mutex> lock(m_mutex);
         auto system = registerSystem<SystemType>();
         Signature signature;
 
@@ -137,18 +122,12 @@ public:
 
 	std::vector<Entity>& getEntities()
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
 		return m_entities;
 	}
 
 	const std::vector<Entity>& getEntities() const
 	{
 		return m_entities;
-	}
-
-	std::mutex& getMutex()
-	{
-		return m_mutex;
 	}
 
 protected:
@@ -171,7 +150,6 @@ private:
 	std::unique_ptr<EntityManager> mEntityManager;
 	std::unique_ptr<SystemManager> mSystemManager;
 	std::vector<Entity> m_entities;
-	std::mutex m_mutex;
 };
 
 }

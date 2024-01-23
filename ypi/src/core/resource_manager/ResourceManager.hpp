@@ -21,6 +21,7 @@
 #include "parsing.hpp"
 #include "logger.hpp"
 #include "MusicManager.hpp"
+#include "Exception.hpp"
 
 namespace exng {
 
@@ -90,6 +91,13 @@ namespace exng {
                         break;
                     default:
                         THROW("Unknown resource type");
+                }
+            }
+
+            static void waitForLoading()
+            {
+                while (isLoading()) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 }
             }
 

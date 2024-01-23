@@ -19,12 +19,14 @@ struct Transform
         mLocalPosition = position;
         mGlobalPosition = position;
     }
+
     void setPosition(float x, float y) {
         mLocalPosition.x = x;
         mLocalPosition.y = y;
         mGlobalPosition.x = x;
         mGlobalPosition.y = y;
     }
+
     exng::Vector2f getPosition() const { return mGlobalPosition; }
     exng::Vector2f getLocalPosition() const { return mLocalPosition; }
 

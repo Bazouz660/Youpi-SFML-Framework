@@ -9,38 +9,29 @@
 
 namespace constructors {
 
-    exng::Entity createVerletBall(exng::Coordinator &coordinator, exng::Vector2f position, float radius, sf::Color color) {
+    exng::Entity createVerletBall(exng::Coordinator &coordinator, exng::Vector2f position, float radius, sf::Color color)
+    {
         exng::Entity entity = coordinator.createEntity();
-
-        comp::Transform transform;
-        transform.setPosition(position);
 
         comp::Verlet verlet;
         verlet.radius = radius;
         verlet.position = position;
         verlet.oldPosition = position;
-        verlet.acceleration = {1000000.f, 0.0f};
+        verlet.oldPosition -= {1.f, 0.0f};
+        verlet.acceleration = {0.0f, 0.0f};
+        verlet.mass = radius * radius;
 
-        comp::VertexArrayDrawable drawable;
-        drawable.primitiveType = sf::PrimitiveType::TriangleFan;
+        comp::CircleDrawable circle;
+        circle.shape.setRadius(radius);
+        circle.shape.setFillColor(color);
 
-        //comp::Sound sound;
-        //sound.sound = std::make_shared<sf::Sound>();
-        //sound.sound->setBuffer(exng::ResourceManager::getSoundBuffer("sound", "bounce"));
+        comp::Transform transform;
+        transform.setPosition(position);
+        transform.setOrigin({radius, radius});
 
-        // generate a circle with x segments
-        int segments = 8 + (radius * 2);
-        float angle = 0.0f;
-        float angleStep = 360.0f / segments;
-        for (int i = 0; i < segments; i++) {
-            drawable.vertices.append(sf::Vertex(sf::Vector2f(radius * cos(angle * PI / 180.0f), radius * sin(angle * PI / 180.0f)), color));
-            angle += angleStep;
-        }
-
-        coordinator.addComponent(entity, transform);
         coordinator.addComponent(entity, verlet);
-        coordinator.addComponent(entity, drawable);
-        //coordinator.addComponent(entity, sound);
+        coordinator.addComponent(entity, circle);
+        coordinator.addComponent(entity, transform);
 
         return entity;
     }

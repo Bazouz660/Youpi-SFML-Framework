@@ -110,4 +110,12 @@ namespace exng {
         return view;
     }
 
+    Vector2f Window::getMousePosition() const
+    {
+        auto pos = sf::Mouse::getPosition(m_window);
+        // transform the mouse position from window coordinates to world coordinates
+        auto worldPos = m_window.mapPixelToCoords(pos);
+        return Vector2f(worldPos.x, worldPos.y);
+    }
+
 } // namespace exng

@@ -101,6 +101,11 @@ namespace exng {
             return sqrt(v.x * v.x + v.y * v.y);
         }
 
+        float lengthSquared(Vector2f v)
+        {
+            return (v.x * v.x + v.y * v.y);
+        }
+
         Vector2f unit(Vector2f v)
         {
             float l = length(v);
@@ -155,6 +160,11 @@ namespace exng {
         Vector2f reflect(Vector2f v, Vector2f n)
         {
             return v - 2 * dot(v, n) * n;
+        }
+
+        bool pointInCircle(Vector2f point, Vector2f center, float radius)
+        {
+            return distSquared(point, center) <= radius * radius;
         }
     }
 }

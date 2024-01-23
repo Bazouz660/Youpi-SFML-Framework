@@ -23,10 +23,3 @@ namespace exng::utils {
     }
 
 }
-
-namespace exng::utils {
-    struct threadSafeQueue {
-        std::mutex m_mutex;
-        std::queue<std::function<void()>> m_queue;
-    };
-}

@@ -36,7 +36,7 @@ namespace exng::gui
          * @param text Le texte à afficher.
          * @param size La taille de la police de caractères (par défaut : 30).
          */
-        Label(const sf::Vector2f &position, const std::string &text, int size = 30);
+        Label(const exng::Vector2f &position, const std::string &text, int size = 30);
 
         /**
          * @brief Destructeur de la classe Label.

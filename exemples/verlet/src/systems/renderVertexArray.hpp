@@ -20,15 +20,12 @@ namespace sys
             {
                 for (auto const &entity : mEntities) {
                     auto &drawable = mCoordinator.getComponent<comp::VertexArrayDrawable>(entity);
-                    auto &transform = mCoordinator.getComponent<comp::Transform>(entity);
+                    auto &verlet = mCoordinator.getComponent<comp::Verlet>(entity);
 
                     drawable.vertices.setPrimitiveType(drawable.primitiveType);
 
                     sf::RenderStates states;
-                    states.transform.translate({transform.getPosition().x, transform.getPosition().y});
-                    states.transform.rotate(transform.getRotation());
-                    states.transform.scale(transform.getScale().x, transform.getScale().y);
-                    states.transform.translate({-transform.getOrigin().x, -transform.getOrigin().y});
+                    states.transform.translate({verlet.position.x, verlet.position.y});
 
                     window.draw(drawable.vertices, states);
                 }

@@ -13,39 +13,52 @@ namespace sys
         public:
             VerletSystem(exng::Coordinator &coordinator) : System(coordinator) {}
 
-            void update(float dt)
+            void update(float slowMotionFactor)
             {
-                m_timer += dt;
-                if (m_timer > float(1.f / 480.f)) {
+                unsigned int subSteps = 8;
+                float stepDt = (m_fixedTimeStep / subSteps);
 
-                    const u_int32_t substeps = 6;
-                    const float subDt = m_timer / float(substeps);
-
-                    for (u_int32_t i(substeps); i--;) {
-                        applyGravity();
-                        applyCircleConstraints();
-                        solveCollisions();
-                        updatePositions(subDt);
-                    }
-
-                    m_timer = 0;
+                for (auto& entity : mEntities) {
+                    auto& verlet = mCoordinator.getComponent<comp::Verlet>(entity);
+                    m_entitiesPairs.push_back({entity, &verlet});
                 }
+
+                for (unsigned int i(subSteps); i--;) {
+                    applyGravity();
+                    updatePositions(stepDt);
+                    applyCircleConstraints();
+                    solveCollisions();
+                }
+
+                for (auto& [entity, verlet] : m_entitiesPairs) {
+                    auto& transform = mCoordinator.getComponent<comp::Transform>(entity);
+
+                    transform.setPosition(verlet->position);
+                }
+
+                m_entitiesPairs.clear();
             }
 
             void updatePositions(float dt)
             {
+                const float maxVelocity = 10.0f; // Adjust this value to change the maximum velocity
+
                 for (auto& entity : mEntities) {
                     auto& verlet = mCoordinator.getComponent<comp::Verlet>(entity);
                     auto& transform = mCoordinator.getComponent<comp::Transform>(entity);
 
-                    const exng::Vector2f vel = verlet.position - verlet.oldPosition;
+                    exng::Vector2f vel = (verlet.position - verlet.oldPosition);
+
+                    // Limit the velocity
+                    float velocityLength = exng::math::length(vel);
+                    if (velocityLength > maxVelocity) {
+                        vel = (vel / velocityLength) * maxVelocity;
+                    }
 
                     verlet.oldPosition = verlet.position;
                     verlet.position += vel + verlet.acceleration * dt * dt;
 
                     verlet.acceleration = {0.0f, 0.0f};
-
-                    transform.setPosition(verlet.position);
                 }
             }
 
@@ -61,58 +74,53 @@ namespace sys
 
             void applyCircleConstraints()
             {
-                const exng::Vector2f position = {400.f, 300.f};
-                const float radius = 200.0f;
+                const exng::Vector2f center = {400.f, 300.f};
+                const float radius = 300.0f;
 
                 for (auto& entity : mEntities) {
                     auto& verlet = mCoordinator.getComponent<comp::Verlet>(entity);
-                    auto& transform = mCoordinator.getComponent<comp::Transform>(entity);
 
-                    const exng::Vector2f delta = verlet.position - position;
-                    const float deltaLength = exng::math::length(delta);
-
-                    if (deltaLength > radius) {
-                        const exng::Vector2f normal = delta / deltaLength;
-                        verlet.position = position + normal * radius;
+                    const exng::Vector2f v = center - verlet.position;
+                    const float dist = exng::math::length(v);
+                    if (dist > (radius - verlet.radius)) {
+                        const exng::Vector2f n = v / dist;
+                        verlet.position = center - n * (radius - verlet.radius);
                     }
-
-                    transform.setPosition(verlet.position);
                 }
             }
 
             void solveCollisions()
             {
-                for (auto& entity : mEntities) {
-                    auto& verlet = mCoordinator.getComponent<comp::Verlet>(entity);
-                    auto& transform = mCoordinator.getComponent<comp::Transform>(entity);
+                for (size_t i = 0; i < m_entitiesPairs.size(); ++i) {
+                    for (size_t j = i + 1; j < m_entitiesPairs.size(); ++j) {
+                        auto& verlet = *m_entitiesPairs[i].second;
+                        auto& verlet2 = *m_entitiesPairs[j].second;
 
-                    for (auto& otherEntity : mEntities) {
-                        if (entity == otherEntity)
+                        // check if the two balls are near enough to collide on the x axis
+                        float distX = abs(verlet.position.x - verlet2.position.x);
+                        float distY = abs(verlet.position.y - verlet2.position.y);
+                        if (distX > verlet.radius + verlet2.radius || distY > verlet.radius + verlet2.radius)
                             continue;
 
-                        auto& otherVerlet = mCoordinator.getComponent<comp::Verlet>(otherEntity);
-                        auto& otherTransform = mCoordinator.getComponent<comp::Transform>(otherEntity);
-
-                        const exng::Vector2f collisionAxis = verlet.position - otherVerlet.position;
+                        const exng::Vector2f collisionAxis = verlet.position - verlet2.position;
                         const float dist = exng::math::length(collisionAxis);
 
-                        if (dist < verlet.radius + otherVerlet.radius) {
-
+                        if (dist < verlet.radius + verlet2.radius) {
                             const exng::Vector2f normal = collisionAxis / dist;
-                            const float delta = (verlet.radius + otherVerlet.radius - dist);
+                            const float delta = (verlet.radius + verlet2.radius - dist);
 
-                            verlet.position += 0.5f * delta * normal;
-                            otherVerlet.position -= 0.5f * delta * normal;
+                            float totalMass = verlet.mass + verlet2.mass;
+                            verlet.position += (verlet2.mass / totalMass) * delta * normal; // Adjust by mass here
+                            verlet2.position -= (verlet.mass / totalMass) * delta * normal; // Adjust by mass here
                         }
-
-                        transform.setPosition(verlet.position);
-                        otherTransform.setPosition(otherVerlet.position);
                     }
                 }
             }
 
         private:
-            float m_timer = 0;
+            float m_accumulator = 0;
+            float m_fixedTimeStep = 1.f / 60.f;
+            std::vector<std::pair<exng::Entity, comp::Verlet*>> m_entitiesPairs;
     };
 
 }

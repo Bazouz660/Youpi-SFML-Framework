@@ -28,12 +28,14 @@ namespace exng {
         extern float cross(Vector2f v1, Vector2f v2);
         extern float angle(Vector2f v1, Vector2f v2);
         extern float length(Vector2f v);
+        extern float lengthSquared(Vector2f v);
         extern Vector2f unit(Vector2f v);
         extern Vector2f lerp(Vector2f v1, Vector2f v2, float t);
         extern float lerp(float v1, float v2, float t);
         extern float toDeg(float rad);
         extern float toRad(float deg);
         extern float invertAngle(float deg);
+        extern bool pointInCircle(Vector2f point, Vector2f center, float radius);
 
         extern float flip(float x);
         extern float dumbPow(float x, uint32_t p);
