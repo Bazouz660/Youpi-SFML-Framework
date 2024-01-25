@@ -4,6 +4,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
 
 target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/ypi/src)
+target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/exemples/verlet/include)
 # Find all subfolders in ypi/src and add them to include directories
 file(GLOB_RECURSE header_files ${CMAKE_SOURCE_DIR}/ypi/src/*.hpp)
 foreach(_headerFile ${header_files})

@@ -86,6 +86,14 @@ public:
         return result;
     }
 
+    std::vector<ItemType> query(const exng::Vector2f& position) const {
+        int x = std::max(0, static_cast<int>(position.x / m_cellSize));
+        int y = std::max(0, static_cast<int>(position.y / m_cellSize));
+
+        const auto& cell = m_grid[y * m_width + x];
+        return cell;
+    }
+
 private:
     int m_width;
     int m_height;

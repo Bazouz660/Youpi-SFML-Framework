@@ -5,27 +5,44 @@
 #include "ypi/src/core/window/Window.hpp"
 #include "ypi/src/helper/math/math.hpp"
 
+#include "ypi/src/core/space_partitionning/Grid.hpp"
+#include "ypi/src/core/rect/Rect.hpp"
+
+#include "ypi/lib_headers/entt.hpp"
+
 #include "../components/components.hpp"
 
 namespace sys
 {
 
-    class DragSystem : public exng::sys::System
+    class DragSystem
     {
         public:
-            DragSystem(exng::Coordinator &coordinator) : System(coordinator) {}
+            DragSystem() = default;
 
-            void update(exng::Window &window)
+            void update(entt::registry& registry, exng::Grid<GridVal, GetBoxFunc, Equal, PairHash>& grid, exng::Window &window)
             {
                 exng::Vector2f mousePosition = window.getMousePosition();
 
-                for (auto const &entity : mEntities) {
-                    auto &verlet = mCoordinator.getComponent<comp::Verlet>(entity);
-                    auto &drawable = mCoordinator.getComponent<comp::CircleDrawable>(entity);
+                auto entities = grid.query(mousePosition);
 
-                    bool isMouseOver = exng::math::pointInCircle(mousePosition, verlet.position, verlet.radius);
+                bool found = false;
+                for (auto const &[entity, verlet] : entities) {
+                    auto& drawable = registry.get<comp::CircleDrawable>(entity);
+
+                    bool isMouseOver = exng::math::pointInCircle(mousePosition, verlet->position, verlet->radius);
 
                     if (isMouseOver) {
+                        if (!mIsLastHovered) {
+                            mLastHoveredEntity = entity;
+                            mIsLastHovered = true;
+                        } else {
+                            if (mLastHoveredEntity != entity) {
+                                auto& lastHoveredDrawable = registry.get<comp::CircleDrawable>(mLastHoveredEntity);
+                                lastHoveredDrawable.shape.setOutlineThickness(0.0f);
+                                mLastHoveredEntity = entity;
+                            }
+                        }
                         drawable.shape.setOutlineColor(sf::Color::Red);
                         drawable.shape.setOutlineThickness(1.0f);
                     } else {
@@ -42,8 +59,8 @@ namespace sys
                     }
                 }
 
-                if (mIsDragged) {
-                    auto &verlet = mCoordinator.getComponent<comp::Verlet>(mDraggedEntity);
+                if (mIsDragged && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                    auto &verlet = registry.get<comp::Verlet>(mDraggedEntity);
                     float dist = exng::math::dist(mousePosition, verlet.position);
                     if (dist > 1.0f) { // Avoid division by zero
                         exng::Vector2f direction = (mousePosition - verlet.position);
@@ -51,12 +68,16 @@ namespace sys
                         float dampingFactor = 0.9f; // Adjust this value to change the amount of damping
                         verlet.acceleration += direction * std::pow(dist, 2.f) * 10.f / dist - velocity * dampingFactor;
                     }
+                } else {
+                    mIsDragged = false;
                 }
             }
 
         private:
-            exng::Entity mDraggedEntity;
+            entt::entity mDraggedEntity;
+            entt::entity mLastHoveredEntity;
             bool mIsDragged = false;
+            bool mIsLastHovered = false;
     };
 
 }

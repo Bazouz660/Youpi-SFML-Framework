@@ -9,44 +9,22 @@
 
 #include "ypi/lib_headers/entt.hpp"
 
+#include "gridVal.h"
+
 #include <future>
 
 namespace sys
 {
 
-    using GridVal = std::pair<entt::entity, comp::Verlet*>;
-    using GetBoxFunc = std::function<exng::Rect<float>(const GridVal&)>;
-
     class VerletSystem
     {
         public:
 
-            struct Equal {
-                bool operator()(const std::pair<entt::entity, comp::Verlet*>& a, const std::pair<entt::entity, comp::Verlet*>& b) const {
-                    return a.first == b.first;
-                }
-            };
-
-            struct PairHash {
-                std::size_t operator()(const std::pair<entt::entity, comp::Verlet*>& pair) const {
-                    return std::hash<entt::entity>()(pair.first);
-                }
-            };
-
             VerletSystem()
-                : m_grid(800, 600, 15, [&](const GridVal& entity) {
-                    exng::Rect<float> aabb;
-                    auto verlet = entity.second;
-                    aabb.left = verlet->position.x - verlet->radius;
-                    aabb.top = verlet->position.y - verlet->radius;
-                    aabb.width = verlet->radius * 2;
-                    aabb.height = verlet->radius * 2;
-                    return aabb;
-                })
             {
             }
 
-            void update(entt::registry& registry, float slowMotionFactor)
+            void update(entt::registry& registry, exng::Grid<GridVal, GetBoxFunc, Equal, PairHash>& grid, float slowMotionFactor)
             {
                 unsigned int subSteps = 8;
                 float stepDt = (m_fixedTimeStep / subSteps);
@@ -55,14 +33,14 @@ namespace sys
                 for (unsigned int i(subSteps); i--;) {
                     // update the grid
                     view.each([&](auto entity, auto& verlet, auto& transform) {
-                        m_grid.update({entity, &verlet});
+                        grid.update({entity, &verlet});
                     });
 
                     view.each([&](auto entity, auto& verlet, auto& transform) {
                         applyGravity(entity, verlet);
                         updatePositions(entity, verlet, stepDt);
                         applyCircleConstraints(entity, verlet);
-                        solveCollisions(entity, verlet);
+                        solveCollisions(entity, verlet, grid);
                         transform.setPosition(verlet.position);
                     });
                 }
@@ -106,7 +84,7 @@ namespace sys
                 }
             }
 
-            void solveCollisions(const entt::entity& entity1, comp::Verlet& verlet1)
+            void solveCollisions(const entt::entity& entity1, comp::Verlet& verlet1, exng::Grid<GridVal, GetBoxFunc, Equal, PairHash>& grid)
             {
                     exng::Rect<float> aabb1;
                     aabb1.left = verlet1.position.x - verlet1.radius;
@@ -114,7 +92,7 @@ namespace sys
                     aabb1.width = verlet1.radius * 2;
                     aabb1.height = verlet1.radius * 2;
 
-                    auto entities = m_grid.query(aabb1);
+                    auto entities = grid.query(aabb1);
                     for (auto& [entity2, verlet2] : entities) {
                         if (entity1 == entity2)
                             continue;
@@ -142,8 +120,6 @@ namespace sys
             float m_accumulator = 0;
             float m_fixedTimeStep = 1.f / 60.f;
             float m_gravity = 1000.0f;
-
-            exng::Grid<GridVal, GetBoxFunc, Equal, PairHash> m_grid;
     };
 
 }

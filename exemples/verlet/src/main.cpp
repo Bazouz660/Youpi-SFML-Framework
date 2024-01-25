@@ -2,14 +2,19 @@
 #include "ypi/src/core/ecs/coordinator.hpp"
 #include "ypi/src/core/chrono/Chrono.hpp"
 #include "ypi/src/core/resource_manager/ResourceManager.hpp"
+#include "ypi/src/core/space_partitionning/Grid.hpp"
+#include "ypi/src/core/rect/Rect.hpp"
 #include "ypi/src/core/gui/Label.hpp"
 #include "ypi/src/core/gui/Container.hpp"
 #include "ypi/src/helper/color.hpp"
+
+#include "ypi/lib_headers/entt.hpp"
+
 #include "entityConstructors.hpp"
 #include "components/components.hpp"
 #include "systems/systems.hpp"
 
-#include "ypi/lib_headers/entt.hpp"
+#include "gridVal.h"
 
 int main()
 {
@@ -18,6 +23,17 @@ int main()
     exng::Chrono chrono;
     sf::Event event;
     exng::gui::Container guiContainer;
+
+    exng::Grid<GridVal, GetBoxFunc, Equal, PairHash> grid(800, 600, 15, [&](const GridVal& entity) {
+        exng::Rect<float> aabb;
+        auto verlet = entity.second;
+        aabb.left = verlet->position.x - verlet->radius;
+        aabb.top = verlet->position.y - verlet->radius;
+        aabb.width = verlet->radius * 2;
+        aabb.height = verlet->radius * 2;
+        return aabb;
+    });
+
     float spawnTimer = 0.0f;
     float fpsRefreshTimer = 0.0f;
     float slowMotionFactor = 1.0f;
@@ -30,6 +46,7 @@ int main()
 
     auto verletSystem = sys::VerletSystem();
     auto renderCircle = sys::RenderCircle();
+    auto dragSystem = sys::DragSystem();
 
     auto fpsLabel = std::make_shared<exng::gui::Label>(exng::Vector2f(0, 0), "fps: 0");
     fpsLabel->getText().setFont(exng::ResourceManager::getFont("font", "Retrocompute"));
@@ -45,7 +62,7 @@ int main()
     window.create("Test", {800, 600});
     window.setVerticalSyncEnabled(true);
 
-    //constructors::createVerletBall(coordinator, {200.0f, 200.0f}, 20.0f, exng::coloring::rainbow(chrono.getElapsedTime().asSeconds()));
+    constructors::createVerletBall(registry, {200.0f, 200.0f}, 50.0f, exng::coloring::rainbow(chrono.getElapsedTime().asSeconds()));
 
     while (window.isOpen()) {
 
@@ -90,7 +107,8 @@ int main()
         }
 
         //dragSystem->update(window);
-        verletSystem.update(registry, slowMotionFactor);
+        verletSystem.update(registry, grid, slowMotionFactor);
+        dragSystem.update(registry, grid, window);
         guiContainer.update();
 
         fpsRefreshTimer += dt;
