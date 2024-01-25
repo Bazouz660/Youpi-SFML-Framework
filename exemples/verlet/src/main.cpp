@@ -9,10 +9,12 @@
 #include "components/components.hpp"
 #include "systems/systems.hpp"
 
+#include "ypi/lib_headers/entt.hpp"
+
 int main()
 {
     exng::Window window;
-    exng::Coordinator coordinator;
+    entt::registry registry;
     exng::Chrono chrono;
     sf::Event event;
     exng::gui::Container guiContainer;
@@ -26,28 +28,8 @@ int main()
 
     exng::ResourceManager::waitForLoading();
 
-    coordinator.init();
-
-    coordinator.registerComponent<comp::Verlet>();
-    coordinator.registerComponent<comp::Sound>();
-    coordinator.registerComponent<comp::Transform>();
-    coordinator.registerComponent<comp::CircleDrawable>();
-    coordinator.registerComponent<comp::VertexArrayDrawable>();
-
-    auto verletSystem = coordinator.createSystem<sys::VerletSystem,
-        comp::Verlet,
-        comp::Transform
-    >();
-
-    auto dragSystem = coordinator.createSystem<sys::DragSystem,
-        comp::Verlet,
-        comp::CircleDrawable
-    >();
-
-    auto renderCircle = coordinator.createSystem<sys::RenderCircle,
-        comp::CircleDrawable,
-        comp::Transform
-    >();
+    auto verletSystem = sys::VerletSystem();
+    auto renderCircle = sys::RenderCircle();
 
     auto fpsLabel = std::make_shared<exng::gui::Label>(exng::Vector2f(0, 0), "fps: 0");
     fpsLabel->getText().setFont(exng::ResourceManager::getFont("font", "Retrocompute"));
@@ -98,16 +80,17 @@ int main()
             float posX = 400;
             float posY = 200;
             for (int i(0); i < nbBalls; ++i) {
-                float radius = exng::nbgen::between(2.0f, 8.0f);
-                constructors::createVerletBall(coordinator, {posX, posY + (i * 20)}, radius, color);
+                float radius = exng::nbgen::between(2.0f, 4.0f);
+                constructors::createVerletBall(registry, {posX, posY + (i * 20)}, radius, color);
             }
 
-            nbBallsLabel->getText().setString("nb balls: " + std::to_string(coordinator.getEntities().size()));
+            auto view = registry.view<comp::Verlet>();
+            nbBallsLabel->getText().setString("nb balls: " + std::to_string(view.size()));
             spawnTimer = 0.0f;
         }
 
-        dragSystem->update(window);
-        verletSystem->update(slowMotionFactor);
+        //dragSystem->update(window);
+        verletSystem.update(registry, slowMotionFactor);
         guiContainer.update();
 
         fpsRefreshTimer += dt;
@@ -118,7 +101,7 @@ int main()
 
         window.clear();
 
-        renderCircle->render(window);
+        renderCircle.render(registry, window);
         guiContainer.render(window);
 
         window.display();

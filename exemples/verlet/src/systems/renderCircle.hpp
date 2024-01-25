@@ -6,27 +6,28 @@
 #include "ypi/src/core/ecs/coordinator.hpp"
 #include "ypi/src/core/window/Window.hpp"
 
+#include "ypi/lib_headers/entt.hpp"
+
 namespace sys
 {
 
-    class RenderCircle : public exng::sys::System
+    class RenderCircle
     {
         public:
-            RenderCircle(exng::Coordinator &coordinator) : System(coordinator) {}
+            RenderCircle() = default;
 
-            void render(exng::Window &window)
+            void render(entt::registry& registry, exng::Window &window)
             {
-                for (auto const &entity : mEntities) {
-                    auto &drawable = mCoordinator.getComponent<comp::CircleDrawable>(entity);
-                    auto &transform = mCoordinator.getComponent<comp::Transform>(entity);
+                auto view = registry.view<comp::CircleDrawable, comp::Transform>();
 
+                view.each([&](auto entity, auto& drawable, auto& transform) {
                     drawable.shape.setPosition({transform.getPosition().x, transform.getPosition().y});
                     drawable.shape.setOrigin({transform.getOrigin().x, transform.getOrigin().y});
                     drawable.shape.setScale({transform.getScale().x, transform.getScale().y});
                     drawable.shape.setRotation(transform.getRotation());
 
                     window.draw(drawable.shape);
-                }
+                });
             }
     };
 

@@ -7,11 +7,13 @@
 #include "ypi/src/helper/number_generator/numberGenerator.hpp"
 #include "components/components.hpp"
 
+#include "ypi/lib_headers/entt.hpp"
+
 namespace constructors {
 
-    exng::Entity createVerletBall(exng::Coordinator &coordinator, exng::Vector2f position, float radius, sf::Color color)
+    entt::entity createVerletBall(entt::registry &registry, exng::Vector2f position, float radius, sf::Color color)
     {
-        exng::Entity entity = coordinator.createEntity();
+        entt::entity entity = registry.create();
 
         comp::Verlet verlet;
         verlet.radius = radius;
@@ -29,9 +31,9 @@ namespace constructors {
         transform.setPosition(position);
         transform.setOrigin({radius, radius});
 
-        coordinator.addComponent(entity, verlet);
-        coordinator.addComponent(entity, circle);
-        coordinator.addComponent(entity, transform);
+        registry.emplace<comp::Verlet>(entity, verlet);
+        registry.emplace<comp::CircleDrawable>(entity, circle);
+        registry.emplace<comp::Transform>(entity, transform);
 
         return entity;
     }
