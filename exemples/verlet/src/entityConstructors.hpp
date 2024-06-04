@@ -1,17 +1,16 @@
 #ifndef ENTITYCONSTRUCTORS_HPP_
 #define ENTITYCONSTRUCTORS_HPP_
 
-#include "ypi/src/core/ecs/coordinator.hpp"
-#include "ypi/src/helper/math/math.hpp"
-#include "ypi/src/core/resource_manager/ResourceManager.hpp"
-#include "ypi/src/helper/number_generator/numberGenerator.hpp"
-#include "components/components.hpp"
+#include "YPI/ecs.hpp"
+#include "YPI/data.hpp"
+#include "YPI/math.hpp"
+#include "YPI/graphics.hpp"
 
-#include "ypi/lib_headers/entt.hpp"
+#include "components/components.hpp"
 
 namespace constructors {
 
-    entt::entity createVerletBall(entt::registry &registry, exng::Vector2f position, float radius, sf::Color color)
+    entt::entity createVerletBall(entt::registry &registry, ypi::Vector2f position, float radius, sf::Color color)
     {
         entt::entity entity = registry.create();
 

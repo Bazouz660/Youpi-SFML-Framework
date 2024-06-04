@@ -1,14 +1,7 @@
-#include "ypi/src/core/window/Window.hpp"
-#include "ypi/src/core/ecs/coordinator.hpp"
-#include "ypi/src/core/chrono/Chrono.hpp"
-#include "ypi/src/core/resource_manager/ResourceManager.hpp"
-#include "ypi/src/core/space_partitionning/Grid.hpp"
-#include "ypi/src/core/rect/Rect.hpp"
-#include "ypi/src/core/gui/Label.hpp"
-#include "ypi/src/core/gui/Container.hpp"
-#include "ypi/src/helper/color.hpp"
-
-#include "ypi/lib_headers/entt.hpp"
+#include "YPI/ecs.hpp"
+#include "YPI/data.hpp"
+#include "YPI/math.hpp"
+#include "YPI/graphics.hpp"
 
 #include "entityConstructors.hpp"
 #include "components/components.hpp"
@@ -18,14 +11,14 @@
 
 int main()
 {
-    exng::Window window;
-    entt::registry registry;
-    exng::Chrono chrono;
+    ypi::RenderWindow window;
+    ypi::ecs::registry registry;
+    ypi::Chrono chrono;
     sf::Event event;
-    exng::gui::Container guiContainer;
+    ypi::gui::Container guiContainer;
 
-    exng::Grid<GridVal, GetBoxFunc, Equal, PairHash> grid(800, 600, 15, [&](const GridVal& entity) {
-        exng::Rect<float> aabb;
+    ypi::Grid<GridVal, GetBoxFunc, Equal, PairHash> grid(800, 600, 15, [&](const GridVal& entity) {
+        ypi::Rect<float> aabb;
         auto verlet = entity.second;
         aabb.left = verlet->position.x - verlet->radius;
         aabb.top = verlet->position.y - verlet->radius;
@@ -38,31 +31,34 @@ int main()
     float fpsRefreshTimer = 0.0f;
     float slowMotionFactor = 1.0f;
 
-    exng::ResourceManager::loadFromFolder(exng::ResourceType::SoundBuffer, "asset/sound", true);
-    exng::ResourceManager::loadFromFolder(exng::ResourceType::Texture, "asset/texture", true);
-    exng::ResourceManager::loadFromFolder(exng::ResourceType::Font, "asset/font", true);
+    ypi::ResourceManager::loadFromFolder(ypi::ResourceType::SoundBuffer, "asset/audio/sound", true);
+    ypi::ResourceManager::loadFromFolder(ypi::ResourceType::Texture, "asset/texture", true);
+    ypi::ResourceManager::loadFromFolder(ypi::ResourceType::Font, "asset/font", true);
 
-    exng::ResourceManager::waitForLoading();
+    ypi::ResourceManager::waitForLoading();
 
     auto verletSystem = sys::VerletSystem();
     auto renderCircle = sys::RenderCircle();
     auto dragSystem = sys::DragSystem();
 
-    auto fpsLabel = std::make_shared<exng::gui::Label>(exng::Vector2f(0, 0), "fps: 0");
-    fpsLabel->getText().setFont(exng::ResourceManager::getFont("font", "Retrocompute"));
-    fpsLabel->getText().setCharacterSize(15);
+    auto fpsLabel = std::make_shared<ypi::gui::Label>();
+    fpsLabel->setFont(ypi::ResourceManager::getFont("font", "Retrocompute"));
+    fpsLabel->setCharacterSize(15);
+    fpsLabel->setString("fps: 0");
 
-    auto nbBallsLabel = std::make_shared<exng::gui::Label>(exng::Vector2f(0, 15), "nb balls: 0");
-    nbBallsLabel->getText().setFont(exng::ResourceManager::getFont("font", "Retrocompute"));
-    nbBallsLabel->getText().setCharacterSize(15);
+    auto nbBallsLabel = std::make_shared<ypi::gui::Label>();
+    nbBallsLabel->setFont(ypi::ResourceManager::getFont("font", "Retrocompute"));
+    nbBallsLabel->setCharacterSize(15);
+    nbBallsLabel->setString("nb balls: 0");
+    nbBallsLabel->setPosition({0, 15});
 
-    guiContainer.addComponent(fpsLabel);
-    guiContainer.addComponent(nbBallsLabel);
+    guiContainer.addComponent("fpsLabel", fpsLabel);
+    guiContainer.addComponent("nbBallsLabel", nbBallsLabel);
 
-    window.create("Test", {800, 600});
+    window.create(sf::VideoMode(800, 600), "Verlet", sf::Style::Close | sf::Style::Titlebar);
     window.setVerticalSyncEnabled(true);
 
-    constructors::createVerletBall(registry, {200.0f, 200.0f}, 50.0f, exng::coloring::rainbow(chrono.getElapsedTime().asSeconds()));
+    constructors::createVerletBall(registry, {200.0f, 200.0f}, 50.0f, ypi::coloring::rainbow(chrono.getElapsedTime().asSeconds()));
 
     while (window.isOpen()) {
 
@@ -83,7 +79,7 @@ int main()
                     slowMotionFactor = slowMotionFactor == 1.0f ? 0.1f : 1.0f;
                 }
             }
-            guiContainer.handleEvent(event);
+            guiContainer.handleAnyEvents(event, ypi::context::getMousePosition().to<float>());
         }
 
         if (!window.isOpen())
@@ -91,30 +87,29 @@ int main()
 
         spawnTimer += dt;
         if (spawnTimer >= 0.05f && chrono.getFrameRate() > 60.0f) {
-            sf::Color color = exng::coloring::rainbow(chrono.getElapsedTime().asSeconds());
+            sf::Color color = ypi::coloring::rainbow(chrono.getElapsedTime().asSeconds());
 
             int nbBalls = 4;
             float posX = 400;
             float posY = 200;
             for (int i(0); i < nbBalls; ++i) {
-                float radius = exng::nbgen::between(2.0f, 4.0f);
+                float radius = ypi::nbgen::between(2.0f, 4.0f);
                 constructors::createVerletBall(registry, {posX, posY + (i * 20)}, radius, color);
             }
 
             auto view = registry.view<comp::Verlet>();
-            nbBallsLabel->getText().setString("nb balls: " + std::to_string(view.size()));
+            nbBallsLabel->setString("nb balls: " + std::to_string(view.size()));
             spawnTimer = 0.0f;
         }
 
         //dragSystem->update(window);
         verletSystem.update(registry, grid, slowMotionFactor);
         dragSystem.update(registry, grid, window);
-        guiContainer.update();
 
         fpsRefreshTimer += dt;
         if (fpsRefreshTimer >= 0.2f) {
             fpsRefreshTimer = 0.0f;
-            fpsLabel->getText().setString("fps: " + std::to_string(int(1.0f / dt)));
+            fpsLabel->setString("fps: " + std::to_string(int(1.0f / dt)));
         }
 
         window.clear();
@@ -125,5 +120,5 @@ int main()
         window.display();
     }
 
-    exng::ResourceManager::stop();
+    ypi::ResourceManager::stop();
 }

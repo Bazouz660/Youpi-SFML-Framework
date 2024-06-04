@@ -2,11 +2,10 @@
 
 #include "../components/components.hpp"
 
-#include "ypi/src/core/ecs/system/system.hpp"
-#include "ypi/src/core/ecs/coordinator.hpp"
-#include "ypi/src/core/window/Window.hpp"
-
-#include "ypi/lib_headers/entt.hpp"
+#include "YPI/ecs.hpp"
+#include "YPI/data.hpp"
+#include "YPI/math.hpp"
+#include "YPI/graphics.hpp"
 
 namespace sys
 {
@@ -16,7 +15,7 @@ namespace sys
         public:
             RenderCircle() = default;
 
-            void render(entt::registry& registry, exng::Window &window)
+            void render(entt::registry& registry, ypi::RenderWindow &window)
             {
                 auto view = registry.view<comp::CircleDrawable, comp::Transform>();
 

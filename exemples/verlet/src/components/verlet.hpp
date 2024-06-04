@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ypi/src/core/vector2/Vector2.hpp"
+#include "YPI/math.hpp"
 
 namespace comp {
 
@@ -8,9 +8,9 @@ namespace comp {
     {
         float radius = 5.0f;
         float mass = 1.0f;
-        exng::Vector2f position;
-        exng::Vector2f oldPosition;
-        exng::Vector2f acceleration;
+        ypi::Vector2f position;
+        ypi::Vector2f oldPosition;
+        ypi::Vector2f acceleration;
     };
 
 }

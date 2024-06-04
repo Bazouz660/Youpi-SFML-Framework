@@ -2,11 +2,10 @@
 
 #include "../components/components.hpp"
 
-#include "ypi/src/core/ecs/system/system.hpp"
-#include "ypi/src/core/ecs/coordinator.hpp"
-#include "ypi/src/core/window/Window.hpp"
-
-#include "ypi/lib_headers/entt.hpp"
+#include "YPI/ecs.hpp"
+#include "YPI/data.hpp"
+#include "YPI/math.hpp"
+#include "YPI/graphics.hpp"
 
 namespace sys
 {
@@ -46,7 +45,7 @@ namespace sys
                 m_vertexBuffer.update(m_vertices.data());
             }
 
-            void render(float offsetX, float offsetY, exng::Window &window)
+            void render(float offsetX, float offsetY, ypi::RenderWindow &window)
             {
                 sf::RenderStates states;
                 states.transform.translate(offsetX, offsetY);

@@ -31,8 +31,14 @@
 *.out
 *.app
 
-# Vscode
-.vscode
+# Build directory
+build/
 
-# Build folder
-build
+# Vscode
+.vscode/
+
+*.log
+*.txt
+
+# config
+settings.ini

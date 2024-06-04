@@ -7,7 +7,7 @@ include(ExternalProject)
 if(UNIX)
     set(CMAKE_CXX_FLAGS "-ldl -O3")
 else()
-    set(CMAKE_CXX_FLAGS "-O3")
+    set(CMAKE_CXX_FLAGS "-O3 -g")
 endif()
 
 # Clone and bootstrap vcpkg if it doesn't exist
@@ -46,7 +46,7 @@ project(Youpi-Engine)
 set(CMAKE_CXX_STANDARD 20)
 
 if (WIN32)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld -static-libgcc -static-libstdc++ -static")
 endif()
 
 # Set the project version
@@ -59,8 +59,7 @@ set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_
 set(SFML_STATIC_LIBRARIES TRUE)
 find_package(SFML COMPONENTS graphics window system network audio REQUIRED)
 
-# Add the client and server subdirectories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR})
 
-add_subdirectory(ypi)
+add_subdirectory(src)
 add_subdirectory(exemples/verlet)

@@ -2,12 +2,10 @@
 
 #include "../components/components.hpp"
 
-#include "ypi/src/core/ecs/system/system.hpp"
-#include "ypi/src/core/ecs/coordinator.hpp"
-#include "ypi/src/core/space_partitionning/Grid.hpp"
-#include "ypi/src/core/rect/Rect.hpp"
-
-#include "ypi/lib_headers/entt.hpp"
+#include "YPI/ecs.hpp"
+#include "YPI/data.hpp"
+#include "YPI/math.hpp"
+#include "YPI/graphics.hpp"
 
 #include "gridVal.h"
 
@@ -24,7 +22,7 @@ namespace sys
             {
             }
 
-            void update(entt::registry& registry, exng::Grid<GridVal, GetBoxFunc, Equal, PairHash>& grid, float slowMotionFactor)
+            void update(entt::registry& registry, ypi::Grid<GridVal, GetBoxFunc, Equal, PairHash>& grid, float slowMotionFactor)
             {
                 unsigned int subSteps = 8;
                 float stepDt = (m_fixedTimeStep / subSteps);
@@ -52,10 +50,10 @@ namespace sys
             {
                 const float maxVelocity = 10.0f; // Adjust this value to change the maximum velocity
 
-                exng::Vector2f vel = (verlet.position - verlet.oldPosition);
+                ypi::Vector2f vel = (verlet.position - verlet.oldPosition);
 
                 // Limit the velocity
-                float velocityLength = exng::math::length(vel);
+                float velocityLength = ypi::math::length(vel);
                 if (velocityLength > maxVelocity) {
                     vel = (vel / velocityLength) * maxVelocity;
                 }
@@ -73,20 +71,20 @@ namespace sys
 
             void applyCircleConstraints(entt::entity& entity, comp::Verlet& verlet)
             {
-                const exng::Vector2f center = {400.f, 300.f};
+                const ypi::Vector2f center = {400.f, 300.f};
                 const float radius = 300.0f;
 
-                const exng::Vector2f v = center - verlet.position;
-                const float dist = exng::math::length(v);
+                const ypi::Vector2f v = center - verlet.position;
+                const float dist = ypi::math::length(v);
                 if (dist > (radius - verlet.radius)) {
-                    const exng::Vector2f n = v / dist;
+                    const ypi::Vector2f n = v / dist;
                     verlet.position = center - n * (radius - verlet.radius);
                 }
             }
 
-            void solveCollisions(const entt::entity& entity1, comp::Verlet& verlet1, exng::Grid<GridVal, GetBoxFunc, Equal, PairHash>& grid)
+            void solveCollisions(const entt::entity& entity1, comp::Verlet& verlet1, ypi::Grid<GridVal, GetBoxFunc, Equal, PairHash>& grid)
             {
-                    exng::Rect<float> aabb1;
+                    ypi::Rect<float> aabb1;
                     aabb1.left = verlet1.position.x - verlet1.radius;
                     aabb1.top = verlet1.position.y - verlet1.radius;
                     aabb1.width = verlet1.radius * 2;
@@ -103,11 +101,11 @@ namespace sys
                         if (distX > verlet1.radius + verlet2->radius || distY > verlet1.radius + verlet2->radius)
                             continue;
 
-                        const exng::Vector2f collisionAxis = verlet1.position - verlet2->position;
-                        const float dist = exng::math::length(collisionAxis);
+                        const ypi::Vector2f collisionAxis = verlet1.position - verlet2->position;
+                        const float dist = ypi::math::length(collisionAxis);
 
                         if (dist < verlet1.radius + verlet2->radius) {
-                            const exng::Vector2f normal = collisionAxis / dist;
+                            const ypi::Vector2f normal = collisionAxis / dist;
                             const float delta = (verlet1.radius + verlet2->radius - dist);
 
                             float totalMass = verlet1.mass + verlet2->mass;

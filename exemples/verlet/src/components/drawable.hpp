@@ -1,8 +1,8 @@
 #ifndef DRAWABLE_HPP_
 #define DRAWABLE_HPP_
 
-#include "ypi/src/core/vector2/Vector2.hpp"
-#include "ypi/lib_headers/sfml.hpp"
+#include "YPI/math.hpp"
+#include "YPI/graphics.hpp"
 #include <vector>
 
 namespace comp {
